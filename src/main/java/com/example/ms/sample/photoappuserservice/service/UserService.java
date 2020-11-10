@@ -7,6 +7,8 @@ import com.example.ms.sample.photoappuserservice.model.AlbumResponseModel;
 import com.example.ms.sample.photoappuserservice.repository.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,6 +32,8 @@ public class UserService implements UserDetailsService {
     @Autowired
     private AlbumServiceFeignClient albumServiceFeignClient;
 
+    Logger logger = LoggerFactory.getLogger(this.getClass());
+
 
     public UserDTO createUser(final UserDTO userDetails) {
         userDetails.setUserId(UUID.randomUUID().toString());
@@ -52,7 +56,9 @@ public class UserService implements UserDetailsService {
     }
 
     public UserDTO findByUserId(String userId) {
+        logger.info("Before calling albums micro-service");
         List<AlbumResponseModel> albumResponseModelList = albumServiceFeignClient.getAlbums(userId);
+        logger.info("After calling albums micro-service");
         final UserDTO userDTO =  getUserDTOByModelMapper(userRepository.findByUserId(userId));
         userDTO.setAlbumResponseModelList(albumResponseModelList);
         return userDTO;
